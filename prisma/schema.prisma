@@ -1,0 +1,99 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AppUser {
+  id        Int         @id @default(autoincrement())
+  email     String?     @unique
+  phone     String?
+  name      String?
+  surName   String?
+  meta      Json?       @db.JsonB
+  createdAt DateTime    @default(now()) @map("created_at")
+  active    Boolean     @default(true)
+
+  roleId    Int
+  role      Role        @relation(fields: [roleId], references: [id])
+
+  appointments Appointment[]
+}
+
+model Role {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique // ADMIN, EMPLOYEE, CLIENT
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  users     AppUser[]
+}
+
+model Resource {
+  id        Int         @id @default(autoincrement())
+  name      String
+  type      String?     // Ej: "Doctor", "Sala", "Equipo"
+  meta      Json?       @db.JsonB
+  isActive  Boolean     @default(true)
+  createdAt DateTime    @default(now()) @map("created_at")
+
+  appointments Appointment[]
+}
+
+model Service {
+  id        Int         @id @default(autoincrement())
+  name      String
+  durationMinutes Int
+  price     Float?
+  meta      Json?       @db.JsonB
+  createdAt DateTime    @default(now()) @map("created_at")
+
+  appointments Appointment[]
+}
+
+model Appointment {
+  id         Int            @id @default(autoincrement())
+  userId     Int?
+  user       AppUser?       @relation(fields: [userId], references: [id])
+  resourceId Int
+  resource   Resource       @relation(fields: [resourceId], references: [id])
+  serviceId  Int?
+  service    Service?       @relation(fields: [serviceId], references: [id])
+
+  statusId   Int
+  status     AppointmentStatus @relation(fields: [statusId], references: [id])
+
+  startsAt   DateTime       @map("starts_at")
+  endsAt     DateTime       @map("ends_at")
+  metadata   Json?          @db.JsonB
+  notes      String?
+  createdAt  DateTime       @default(now()) @map("created_at")
+  updatedAt  DateTime       @default(now()) @map("updated_at")
+}
+
+model AppointmentStatus {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique // SCHEDULED, CONFIRMED, CANCELLED, COMPLETED
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  appointments Appointment[]
+}
+
+model Settings {
+  id            Int      @id @default(autoincrement())
+  businessName  String?
+  workDays      Json?    @db.JsonB // ej: { "monday": true, "tuesday": false }
+  workHours     Json?    @db.JsonB // ej: { "start": "08:00", "end": "18:00" }
+  reminderEmail Boolean  @default(true)
+  reminderWhats Boolean  @default(false)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @default(now()) @map("updated_at")
+}
