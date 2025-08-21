@@ -1,12 +1,30 @@
-import { Hono } from 'hono';
 import { auth, createController, loginController } from './controller';
-import { protect } from 'src/middleware/validate';
+import createRouter from '@lib/openapi/createRouter';
+import { createRoute, z } from '@hono/zod-openapi';
+import jsonContent from '@lib/openapi/json-content';
+import { ErrorResponse } from '@lib/openapi/reponses';
 
-const authRoutes = new Hono();
+const router = createRouter();
 
 // Ruta para el inicio de sesión
-authRoutes.post('/login', loginController);
-authRoutes.post('/account',protect(), createController);
-authRoutes.post('/validar', auth);
+router.post('/login', loginController);
+router.openapi(
+  createRoute({
+    method: 'get',
+    path: '/account',
+    responses: {
+      [200]: jsonContent(
+        z.object({
+          accessToken: z.string(),
+        }),
+        'Token de acceso generado'
+      ),
+      [500]: ErrorResponse,
+    },
+  }),
+  createController
+);
+// router.post('/account', createController);
+router.post('/validar', auth);
 
-export default authRoutes;
+export default router;

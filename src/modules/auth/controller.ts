@@ -38,7 +38,19 @@ export async function loginController(context: any) {
 export async function createController(c: any) {
   try {
     const body = await c.req.json();
-    const { username, password, name } = body;
+    const {
+      username,
+      password,
+      email,
+      phone,
+      name,
+      surName,
+      meta,
+      createdAt,
+      active,
+      roleId,
+      role,
+    } = body;
 
     if (!username || !password || !name)
       return c.json({ error: 'Faltan datos' }, 400);
