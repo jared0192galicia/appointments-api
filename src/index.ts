@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-// import auth from '@modules/auth/routes';
+import auth from '@modules/auth/routes';
 import welcomeMessage from '@lib/welcome';
 import { logger } from 'hono/logger';
 import dashboardRoutes from '@modules/dashboard/routes';
@@ -16,10 +16,9 @@ console.log(Bun.randomUUIDv7());
 app.use('*', logger());
 app.use('*', cors());
 app.use(serveAbout());
-// app.use(compress());
 
 // Rutas de autenticación
-// app.route('/sesion', auth);
+app.route('/sesion', auth);
 app.route('/dashboard', dashboardRoutes);
 
 //  Inicializa el servidor

@@ -2,7 +2,6 @@ import { createToken, getAuthSecret, verify, type AuthSecret } from '@lib/jwt';
 import type { Token } from '@my-types/auth';
 import { queryGetAccoutByEmail, queryInsertAccout } from './database';
 
-// src/modules/auth/controller.ts
 export async function loginController(context: any) {
   const body = await context.req.json();
   const { username, password } = body;
@@ -12,7 +11,7 @@ export async function loginController(context: any) {
     return context.json({ success: false, message: 'Correo invalido' }, 401);
   }
 
-  const { id, nombre: name } = account;
+  const { id, name, roleId: role } = account;
 
   const passwordMatch = await Bun.password.verify(password, account.clave);
 
@@ -25,8 +24,8 @@ export async function loginController(context: any) {
     id,
     exp: expirationTime,
     samesite: 'none',
-    username,
     name: name || '',
+    role,
   };
 
   const secret: AuthSecret = getAuthSecret(Bun.env.ACCESS_TOKEN || '');
@@ -38,36 +37,17 @@ export async function loginController(context: any) {
 export async function createController(c: any) {
   try {
     const body = await c.req.json();
-    const {
-      username,
-      password,
-      email,
-      phone,
-      name,
-      surName,
-      meta,
-      createdAt,
-      active,
-      roleId,
-      role,
-    } = body;
+    const { password, email } = body;
 
-    if (!username || !password || !name)
-      return c.json({ error: 'Faltan datos' }, 400);
+    const existingUser = await queryGetAccoutByEmail(email);
 
-    const existingUser = await queryGetAccoutByEmail(username);
-
-    if (existingUser) return c.json({ error: 'El usuario ya existe' }, 409);
+    if (existingUser)
+      return c.json({ error: 'Correo ya ah sido registrado' }, 409);
 
     const hash: string = await Bun.password.hash(password);
 
-    const user = {
-      usuario: username,
-      nombre: name,
-      clave: hash,
-    };
-
-    const { id } = await queryInsertAccout(user);
+    const created = await queryInsertAccout({ ...body, password: hash });
+    console.log('🚀 ~ created:', created);
 
     const expirationTime: number = Math.floor(Date.now() / 1000) + 60 * 300;
 
@@ -82,11 +62,13 @@ export async function createController(c: any) {
 
     // Payload para el token
     const payload = {
-      id,
+      id: 0,
       exp: expirationTime,
       samesite: 'none',
-      name: user.nombre,
-      username: user.usuario,
+      name: body.name,
+      surName: body.surName,
+      email: body.email,
+      role: body.roleId,
     };
 
     const authSecret = getAuthSecret(rawSecret);
@@ -95,7 +77,7 @@ export async function createController(c: any) {
 
     return c.json({
       message: 'Cuenta creada correctamente',
-      user,
+      body,
       token,
     });
   } catch (error) {

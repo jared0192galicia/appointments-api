@@ -10,8 +10,22 @@ const router = createRouter();
 router.post('/login', loginController);
 router.openapi(
   createRoute({
-    method: 'get',
+    method: 'post',
     path: '/account',
+    request: {
+      body: jsonContent(
+        z.object({
+          username: z.string(),
+          password: z.string(),
+          email: z.string(),
+          phone: z.string(),
+          name: z.string(),
+          surName: z.string(),
+          roleId: z.number(),
+        }),
+        ''
+      ),
+    },
     responses: {
       [200]: jsonContent(
         z.object({
