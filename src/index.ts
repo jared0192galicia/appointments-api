@@ -10,8 +10,6 @@ import serveAbout from '@lib/about';
 // Aplicación Hono para manejar rutas
 const app = new Hono();
 
-console.log(Bun.randomUUIDv7());
-
 // Middlewares
 app.use('*', logger());
 app.use('*', cors());

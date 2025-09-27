@@ -15,7 +15,6 @@ router.openapi(
     request: {
       body: jsonContent(
         z.object({
-          username: z.string(),
           password: z.string(),
           email: z.string(),
           phone: z.string(),

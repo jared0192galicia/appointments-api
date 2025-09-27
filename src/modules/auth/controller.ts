@@ -4,16 +4,16 @@ import { queryGetAccoutByEmail, queryInsertAccout } from './database';
 
 export async function loginController(context: any) {
   const body = await context.req.json();
-  const { username, password } = body;
+  const { email, password } = body;
 
-  const account: any = await queryGetAccoutByEmail(username);
+  const account: any = await queryGetAccoutByEmail(email);
   if (!account) {
     return context.json({ success: false, message: 'Correo invalido' }, 401);
   }
 
   const { id, name, roleId: role } = account;
 
-  const passwordMatch = await Bun.password.verify(password, account.clave);
+  const passwordMatch = await Bun.password.verify(password, account.password);
 
   if (!passwordMatch)
     return context.json({ message: 'Contraseña invalida' }, 401);
@@ -34,15 +34,15 @@ export async function loginController(context: any) {
   return context.json({ accessToken: token }, 200);
 }
 
-export async function createController(c: any) {
+export async function createController(context: any) {
   try {
-    const body = await c.req.json();
+    const body = await context.req.json();
     const { password, email } = body;
 
     const existingUser = await queryGetAccoutByEmail(email);
 
     if (existingUser)
-      return c.json({ error: 'Correo ya ah sido registrado' }, 409);
+      return context.json({ error: 'Correo ya ah sido registrado' }, 409);
 
     const hash: string = await Bun.password.hash(password);
 
@@ -54,7 +54,7 @@ export async function createController(c: any) {
     // Clave secreta desde variable de entorno
     const rawSecret = Bun.env.ACCESS_TOKEN;
     if (!rawSecret) {
-      return c.json(
+      return context.json(
         { error: 'Servidor sin clave de autenticación configurada' },
         500
       );
@@ -75,14 +75,14 @@ export async function createController(c: any) {
 
     const token = await createToken(payload, authSecret);
 
-    return c.json({
+    return context.json({
       message: 'Cuenta creada correctamente',
       body,
       token,
     });
   } catch (error) {
     console.log(error);
-    return c.json({ error: 'Error interno del servidor' }, 500);
+    return context.json({ error: 'Error interno del servidor' }, 500);
   }
 }
 

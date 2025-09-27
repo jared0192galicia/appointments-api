@@ -7,6 +7,6 @@ export default function welcomeMessage() {
       process.env.MODE == 'development'
         ? chalk.blue('desarrollo')
         : chalk.green('producción')
-    } en el puerto ${chalk.yellow(3001)}\n`
+    } en el puerto ${chalk.yellow(3004)}\n`
   );
 }
