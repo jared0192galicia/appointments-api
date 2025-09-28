@@ -4,6 +4,10 @@ export async function queryGetAccoutByEmail(email: string) {
   return await prisma.user.findUnique({ where: { email: email } });
 }
 
+export async function queryGetAccouts() {
+  return await prisma.user.findMany();
+}
+
 export async function queryInsertAccout(user: any) {
   // const [data] = await db.insert(cuenta).values(user).returning({ id: cuenta.id });
   return await prisma.user.create({ data: user });

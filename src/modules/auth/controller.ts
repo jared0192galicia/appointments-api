@@ -1,6 +1,6 @@
 import { createToken, getAuthSecret, verify, type AuthSecret } from '@lib/jwt';
 import type { Token } from '@my-types/auth';
-import { queryGetAccoutByEmail, queryInsertAccout } from './database';
+import { queryGetAccoutByEmail, queryGetAccouts, queryInsertAccout } from './database';
 
 export async function loginController(context: any) {
   const body = await context.req.json();
@@ -30,9 +30,15 @@ export async function loginController(context: any) {
 
   const secret: AuthSecret = getAuthSecret(Bun.env.ACCESS_TOKEN || '');
   const token: string = await createToken(payload, secret);
-
   return context.json({ accessToken: token }, 200);
 }
+
+export async function getController(context: any) {
+  const accounts = await queryGetAccouts()
+
+    return context.json(accounts, 200);
+}
+
 
 export async function createController(context: any) {
   try {

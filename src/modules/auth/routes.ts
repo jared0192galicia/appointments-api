@@ -1,4 +1,4 @@
-import { auth, createController, loginController } from './controller';
+import { auth, createController, getController, loginController } from './controller';
 import createRouter from '@lib/openapi/createRouter';
 import { createRoute, z } from '@hono/zod-openapi';
 import jsonContent from '@lib/openapi/json-content';
@@ -8,6 +8,30 @@ const router = createRouter();
 
 // Ruta para el inicio de sesión
 router.post('/login', loginController);
+router.openapi(
+  createRoute({
+    method: 'get',
+    path: '/accounts',
+    responses: {
+      [200]: jsonContent(
+        z.array(
+          z.object({
+            password: z.string(),
+            email: z.string(),
+            phone: z.string(),
+            name: z.string(),
+            surName: z.string(),
+            roleId: z.number(),
+          })
+        ),
+        ''
+      ),
+      [500]: ErrorResponse,
+    },
+  }),
+  getController
+);
+
 router.openapi(
   createRoute({
     method: 'post',
