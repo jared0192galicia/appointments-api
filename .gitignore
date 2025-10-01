@@ -177,4 +177,3 @@ dist
 /generated/prisma
 .vscode
 detalles app.md
-bun.lock
