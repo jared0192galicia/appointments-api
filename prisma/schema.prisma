@@ -8,18 +8,18 @@ datasource db {
 }
 
 model User {
-  id        Int          @id @default(autoincrement())
-  email     String?      @unique
-  phone     String?
-  name      String?
-  surName   String?
-  password  String
-  meta      Json?        @db.JsonB
-  createdAt DateTime     @default(now()) @map("created_at")
-  active    Boolean      @default(true)
+  id          Int           @id @default(autoincrement())
+  email       String?       @unique
+  phone       String?
+  name        String?
+  surName     String?
+  password    String
+  meta        Json?         @db.JsonB
+  createdAt   DateTime      @default(now()) @map("created_at")
+  active      Boolean       @default(true)
 
-  roleId    Int          @default(3)
-  role      Role         @relation(fields: [roleId], references: [id])
+  roleId      Int           @default(3)
+  role        Role          @relation(fields: [roleId], references: [id])
 
   appointments Appointment[]
 }
@@ -33,70 +33,108 @@ model Role {
 }
 
 model Branch {
-  id        Int       @id @default(autoincrement())
-  name      String
-  address   String
-  mapUrl    String?   // URL a Google Maps o similar
-  createdAt DateTime  @default(now()) @map("created_at")
-  isActive  Boolean   @default(true)
+  id          Int           @id @default(autoincrement())
+  name        String
+  address     String
+  mapUrl      String?
+  createdAt   DateTime      @default(now()) @map("created_at")
+  isActive    Boolean       @default(true)
 
-  resources Resource[]
+  resources   Resource[]
   appointments Appointment[]
+
+  // 🔗 Servicios disponibles en esta sucursal
+  branchServices BranchService[]
 }
 
 model Resource {
-  id        Int         @id @default(autoincrement())
-  name      String
-  bio       String?     // breve biografía del profesional
-  photoUrl  String?     // URL a la foto del profesional
-  type      String?     // Ej: "Doctor", "Sala", "Equipo"
-  meta      Json?       @db.JsonB
-  isActive  Boolean     @default(true)
-  createdAt DateTime    @default(now()) @map("created_at")
+  id          Int         @id @default(autoincrement())
+  name        String
+  bio         String?
+  photoUrl    String?
+  type        String?
+  meta        Json?       @db.JsonB
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now()) @map("created_at")
 
-  branchId  Int
-  branch    Branch      @relation(fields: [branchId], references: [id])
+  branchId    Int
+  branch      Branch      @relation(fields: [branchId], references: [id])
 
   appointments Appointment[]
+
+  // 🔗 Servicios que este profesional o recurso puede ofrecer
+  resourceServices ResourceService[]
 }
 
 model Service {
-  id        Int         @id @default(autoincrement())
-  name      String
-  description String?
+  id              Int           @id @default(autoincrement())
+  name            String
+  description     String?
   durationMinutes Int
-  price     Float?
-  meta      Json?       @db.JsonB
-  createdAt DateTime    @default(now()) @map("created_at")
+  price           Float?
+  meta            Json?         @db.JsonB
+  createdAt       DateTime      @default(now()) @map("created_at")
 
-  appointments Appointment[]
+  appointments    Appointment[]
+  
+  // 🔗 En qué sucursales está disponible
+  branchServices  BranchService[]
+  
+  // 🔗 Qué recursos pueden ofrecerlo
+  resourceServices ResourceService[]
+}
+
+model BranchService {
+  id          Int       @id @default(autoincrement())
+  branchId    Int
+  serviceId   Int
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  branch      Branch    @relation(fields: [branchId], references: [id])
+  service     Service   @relation(fields: [serviceId], references: [id])
+
+  @@unique([branchId, serviceId])
+}
+
+model ResourceService {
+  id          Int       @id @default(autoincrement())
+  resourceId  Int
+  serviceId   Int
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  resource    Resource  @relation(fields: [resourceId], references: [id])
+  service     Service   @relation(fields: [serviceId], references: [id])
+
+  @@unique([resourceId, serviceId])
 }
 
 model Appointment {
-  id         Int            @id @default(autoincrement())
-  userId     Int
-  user       User           @relation(fields: [userId], references: [id])
+  id          Int            @id @default(autoincrement())
+  userId      Int
+  user        User           @relation(fields: [userId], references: [id])
 
-  branchId   Int
-  branch     Branch         @relation(fields: [branchId], references: [id])
+  branchId    Int
+  branch      Branch         @relation(fields: [branchId], references: [id])
 
-  resourceId Int?           // Profesional es opcional
-  resource   Resource?      @relation(fields: [resourceId], references: [id])
+  resourceId  Int?
+  resource    Resource?      @relation(fields: [resourceId], references: [id])
 
-  serviceId  Int
-  service    Service        @relation(fields: [serviceId], references: [id])
+  serviceId   Int
+  service     Service        @relation(fields: [serviceId], references: [id])
 
-  statusId   Int
-  status     AppointmentStatus @relation(fields: [statusId], references: [id])
+  statusId    Int
+  status      AppointmentStatus @relation(fields: [statusId], references: [id])
 
-  startsAt   DateTime       @map("starts_at")
-  endsAt     DateTime       @map("ends_at")
+  startsAt    DateTime       @map("starts_at")
+  endsAt      DateTime       @map("ends_at")
 
-  metadata   Json?          @db.JsonB
-  clientNote String?        @db.VarChar(500) // Observaciones del cliente
-  notes      String?        // Notas internas
-  createdAt  DateTime       @default(now()) @map("created_at")
-  updatedAt  DateTime       @default(now()) @map("updated_at")
+  metadata    Json?          @db.JsonB
+  clientNote  String?        @db.VarChar(500)
+  notes       String?
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @default(now()) @map("updated_at")
 }
 
 model AppointmentStatus {
@@ -110,8 +148,8 @@ model AppointmentStatus {
 model Settings {
   id            Int      @id @default(autoincrement())
   businessName  String?
-  workDays      Json?    @db.JsonB // ej: { "monday": true, "tuesday": false }
-  workHours     Json?    @db.JsonB // ej: { "start": "08:00", "end": "18:00" }
+  workDays      Json?    @db.JsonB
+  workHours     Json?    @db.JsonB
   reminderEmail Boolean  @default(true)
   reminderWhats Boolean  @default(false)
   createdAt     DateTime @default(now()) @map("created_at")
