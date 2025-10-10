@@ -51,6 +51,16 @@ cd Estudios-api
 bun install
 ```
 
+
+### Database Migrations
+- Use `bun run migrate` for development migrations
+- Use `bun run migrate:deploy` for production deployments
+- Use `bun run db:push` for quick schema prototyping
+- Migration files are stored in `/prisma/migrations/`
+- Database schema is defined in `/prisma/schema.prisma`
+- Use `bun run db:studio` to open Prisma Studio for database management
+
+
 ### 2. ▶️ Ejecutar en modo desarrollo
 
 ```bash
