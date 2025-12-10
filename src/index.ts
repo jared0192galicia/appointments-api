@@ -4,6 +4,7 @@ import welcomeMessage from '@lib/welcome';
 // import { logger } from 'hono/logger';
 import dashboardRoutes from '@modules/dashboard/routes';
 import optionsRoutes from '@modules/options/routes';
+import newsRoutes from '@modules/news/routes';
 
 import { cors } from 'hono/cors';
 import serveAbout from '@lib/about';
@@ -21,6 +22,7 @@ app.use(serveAbout());
 app.route('/sesion', auth);
 app.route('/dashboard', dashboardRoutes);
 app.route('/options', optionsRoutes);
+app.route('/news', newsRoutes);
 
 //  Inicializa el servidor
 Bun.serve({
