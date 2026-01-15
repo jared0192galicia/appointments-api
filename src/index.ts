@@ -5,6 +5,7 @@ import welcomeMessage from '@lib/welcome';
 import dashboardRoutes from '@modules/dashboard/routes';
 import optionsRoutes from '@modules/options/routes';
 import newsRoutes from '@modules/news/routes';
+import citesRoutes from '@modules/cites/routes';
 
 import { cors } from 'hono/cors';
 import serveAbout from '@lib/about';
@@ -23,6 +24,7 @@ app.route('/sesion', auth);
 app.route('/dashboard', dashboardRoutes);
 app.route('/options', optionsRoutes);
 app.route('/news', newsRoutes);
+app.route('/cites', citesRoutes);
 
 //  Inicializa el servidor
 Bun.serve({
