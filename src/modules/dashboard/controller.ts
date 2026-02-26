@@ -90,6 +90,7 @@ export async function getAppointmentsByDateRangeController(context: Context) {
       } : null
     }));
 
+    // Simplificar el código
     return context.json({
       success: true,
       data: formattedAppointments,
